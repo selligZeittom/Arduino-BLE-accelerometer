@@ -14,7 +14,10 @@
 
 /* Create the variables for the BLE exchanges */
 BLEService accelerometerService("19B10010-E8F2-537E-4F6C-D104768A1214");
-BLEByteCharacteristic accelerometerCharacteristic("19B10011-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify);
+BLEByteCharacteristic accelerometerCharacteristicX("19B10011-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify);
+BLEByteCharacteristic accelerometerCharacteristicY("19B10012-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify);
+BLEByteCharacteristic accelerometerCharacteristicZ("19B10013-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify);
+
 
 /*
   Performs a normalization of the acceleration to save memory
@@ -65,14 +68,19 @@ void setup()
   BLE.setLocalName("AccelerometerNano33");
   BLE.setAdvertisedService(accelerometerService);
   
-  /* Add the characteristic to the service */
-  accelerometerService.addCharacteristic(accelerometerCharacteristic);
+  /* Add the characteristics to the service */
+  accelerometerService.addCharacteristic(accelerometerCharacteristicX);
+  accelerometerService.addCharacteristic(accelerometerCharacteristicY);
+  accelerometerService.addCharacteristic(accelerometerCharacteristicZ);
+
   
   /* Add the service */
   BLE.addService(accelerometerService);
 
   /* Set an initial value */
-  accelerometerCharacteristic.writeValue(0);
+  accelerometerCharacteristicX.writeValue(0);
+  accelerometerCharacteristicY.writeValue(0);
+  accelerometerCharacteristicZ.writeValue(0);
   
   /* Start advertising */
   BLE.advertise();
@@ -93,13 +101,18 @@ void loop()
   {
     IMU.readAcceleration(x, y, z);
     bX = normalize_acceleration(x);
-    //bY = normalize_acceleration(y);
-    //bZ = normalize_acceleration(z);
+    bY = normalize_acceleration(y);
+    bZ = normalize_acceleration(z);
     Serial.print("X : ");
-    Serial.println(bX);
-
+    Serial.print(bX);
+    Serial.print(", Y : ");
+    Serial.print(bY);
+    Serial.print(", Z : ");
+    Serial.println(bZ);
     
-    /* Update the characteristic */
-    accelerometerCharacteristic.writeValue(bX);
+    /* Update the characteristics */
+    accelerometerCharacteristicX.writeValue(bX);
+    accelerometerCharacteristicY.writeValue(bY);
+    accelerometerCharacteristicZ.writeValue(bZ);
   }
 }
